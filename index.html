@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- CSS BO GÓC & KHÓA VỊ TRÍ --- */
+        /* --- CSS GIỮ NGUYÊN BỘ KHUNG CỨNG CÁP --- */
         :root { --bg: #f0f2f5; --card: #ffffff; --text: #050505; --muted: #65676b; --primary: #1877f2; --hover: #166fe5; --border: #ced0d4; --bg-cmt: #f0f2f5; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; overflow-y: scroll; }
@@ -22,7 +22,6 @@
         
         main { width: 100%; max-width: 680px; margin: 20px auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
         
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative;}
         .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; cursor: pointer; color: var(--muted); background: var(--bg-cmt); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;}
@@ -32,14 +31,13 @@
         .modal-content input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-size: 1rem; outline: none; }
         .save-btn { width: 100%; background: var(--primary); color: white; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; }
 
-        /* Card Bài Đăng */
         .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding: 15px; display: flex; flex-direction: column; }
         .create-post { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; align-items: center;}
         .create-post textarea { flex: 1; border: none; background: var(--bg-cmt); border-radius: 20px; padding: 10px 15px; font-size: 1rem; resize: none; outline: none; }
         
         #imagePreviewContainer { width: 100%; display: none; margin-top: 10px; position: relative; }
         #imagePreview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; }
-        #removeImageBtn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .remove-img-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
         .post-actions-create { display: flex; justify-content: space-between; align-items: center; }
         .upload-btn { color: #45bd62; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s;}
@@ -57,7 +55,6 @@
         .reaction-count { font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; padding: 5px; border-radius: 5px; }
         .reaction-count:hover { text-decoration: underline; background: var(--bg-cmt); }
         
-        /* KHÓA VỊ TRÍ NÚT THÍCH/BÌNH LUẬN CHỐNG LỆCH */
         .post-stats { display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 4px 0; margin-bottom: 15px; position: relative; gap: 5px; }
         .reaction-btn-wrapper { flex: 1; display: flex; position: relative; }
         .action-btn { flex: 1; padding: 8px 0; display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; border-radius: 6px; white-space: nowrap; font-size: 0.95rem; }
@@ -69,35 +66,63 @@
         .react-icon { font-size: 1.5rem; cursor: pointer; transition: transform 0.2s; }
         .react-icon:hover { transform: scale(1.3); }
 
-        /* KHU VỰC BÌNH LUẬN ĐƯỢC TỔ CHỨC LẠI */
+        /* --- CSS MỚI CHO BÌNH LUẬN --- */
         .comments-section { display: none; flex-direction: column; gap: 15px; }
         .comment-list-wrapper { display: flex; flex-direction: column; gap: 15px; }
         .comment-thread { display: flex; flex-direction: column; gap: 5px; }
         .comment { display: flex; gap: 8px; position: relative; width: 100%; }
         
-        .comment-content-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: calc(100% - 40px); }
+        .comment-content-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: calc(100% - 40px); position: relative; }
         .comment-body { background: var(--bg-cmt); padding: 8px 12px; border-radius: 18px; display: inline-block; word-break: break-word; position: relative; }
-        .comment-author { font-weight: 600; font-size: 0.9rem; line-height: 1.2; margin-bottom: 3px; }
-        .comment-text { font-size: 0.95rem; line-height: 1.3; }
         
-        .cmt-actions-menu { display: none; position: absolute; right: -45px; top: 50%; transform: translateY(-50%); gap: 10px; font-size: 0.8rem; color: var(--muted); background: white; padding: 5px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5;}
+        /* Huy hiệu Tác giả */
+        .comment-author { font-weight: 600; font-size: 0.9rem; line-height: 1.2; margin-bottom: 3px; display: flex; align-items: center; gap: 5px;}
+        .author-badge { background-color: var(--primary); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        
+        .comment-text { font-size: 0.95rem; line-height: 1.3; }
+        .cmt-image { max-width: 150px; border-radius: 12px; margin-top: 5px; cursor: pointer; border: 1px solid var(--border);}
+        
+        /* Bong bóng cảm xúc bình luận */
+        .cmt-reaction-bubble { position: absolute; right: -15px; bottom: -10px; background: white; padding: 2px 5px; border-radius: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 3px; font-size: 0.8rem; cursor: pointer; z-index: 2;}
+        .cmt-reaction-bubble:hover { transform: scale(1.1); }
+
+        .cmt-actions-menu { display: none; position: absolute; right: -45px; top: 15px; gap: 10px; font-size: 0.8rem; color: var(--muted); background: white; padding: 5px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5;}
         .comment-body:hover .cmt-actions-menu { display: flex; }
         .cmt-actions-menu i { cursor: pointer; }
         .cmt-actions-menu i:hover { color: var(--text); }
 
-        .comment-actions { padding-left: 12px; font-size: 0.75rem; color: var(--muted); font-weight: 600; display: flex; gap: 15px; margin-top: 3px; }
-        .comment-actions span { cursor: pointer; }
+        /* Nút hành động dưới bình luận */
+        .comment-actions { padding-left: 12px; font-size: 0.75rem; color: var(--muted); font-weight: 600; display: flex; gap: 15px; margin-top: 3px; align-items: center;}
+        .comment-actions span { cursor: pointer; position: relative;}
         .comment-actions span:hover { text-decoration: underline; }
+        .cmt-reacted-text { color: var(--primary); }
 
-        /* Thiết kế hiển thị Reply thông minh */
+        /* Cảm xúc cho bình luận */
+        .cmt-react-btn-wrapper { position: relative; }
+        .cmt-reaction-bar { display: none; position: absolute; bottom: 100%; left: -10px; background: white; border-radius: 30px; padding: 3px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); gap: 8px; z-index: 10; margin-bottom: 5px;}
+        .cmt-react-btn-wrapper:hover .cmt-reaction-bar { display: flex; }
+        .cmt-react-bar-icon { font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        .cmt-react-bar-icon:hover { transform: scale(1.3); }
+
         .replies-wrapper { margin-left: 40px; margin-top: 5px; border-left: 2px solid #e4e6eb; padding-left: 10px; display: flex; flex-direction: column; gap: 5px;}
         .toggle-replies-btn { font-size: 0.85rem; color: var(--muted); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
         .toggle-replies-btn:hover { text-decoration: underline; color: var(--text); }
-        .replies-container { display: none; flex-direction: column; gap: 10px; } /* Mặc định ẨN */
+        .replies-container { display: none; flex-direction: column; gap: 10px; }
 
-        .add-comment { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
-        .add-comment input { flex: 1; background: var(--bg-cmt); border: none; padding: 10px 15px; border-radius: 20px; outline: none; font-size: 0.95rem; }
-        .send-btn { color: var(--primary); font-size: 1.2rem; padding: 5px; flex-shrink: 0; }
+        /* Ô nhập bình luận mới */
+        .add-comment-wrap { display: flex; flex-direction: column; background: var(--bg-cmt); border-radius: 20px; padding: 5px 15px; flex: 1;}
+        .cmt-preview-box { display: none; position: relative; margin-top: 5px; width: fit-content; }
+        .cmt-preview-box img { height: 60px; border-radius: 8px; }
+        .cmt-preview-box .remove-cmt-img { position: absolute; top: -5px; right: -5px; background: #444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; }
+        
+        .add-comment-inputs { display: flex; align-items: center; width: 100%; gap: 5px;}
+        .add-comment-inputs input[type="text"] { flex: 1; background: transparent; border: none; outline: none; font-size: 0.95rem; padding: 5px 0;}
+        .add-comment-inputs label { cursor: pointer; color: var(--muted); font-size: 1.1rem; padding: 5px; transition: 0.2s; }
+        .add-comment-inputs label:hover { color: var(--primary); }
+        .add-comment-inputs input[type="file"] { display: none; }
+        
+        .add-comment { display: flex; gap: 8px; align-items: flex-end; margin-top: 5px; width: 100%;}
+        .send-btn { color: var(--primary); font-size: 1.2rem; padding: 5px 10px; flex-shrink: 0; margin-bottom: 2px;}
         
         .toggle-comments-btn { color: var(--muted); cursor: pointer; font-size: 0.95rem; font-weight: 600; margin-top: 10px; }
         .toggle-comments-btn:hover { text-decoration: underline; }
@@ -147,7 +172,7 @@
             </div>
             <div id="imagePreviewContainer">
                 <img id="imagePreview">
-                <div id="removeImageBtn"><i class="fa-solid fa-xmark"></i></div>
+                <div id="removeImageBtn" class="remove-img-btn"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="post-actions-create">
                 <label class="upload-btn">
@@ -216,7 +241,7 @@
             document.getElementById('headerName').innerText = myName; document.getElementById('headerAvatar').src = myAvatar; document.querySelectorAll('.current-user-avatar').forEach(img => img.src = myAvatar);
         }
 
-        // --- ĐĂNG BÀI ---
+        // --- ĐĂNG BÀI CHÍNH ---
         let currentImg = null;
         document.getElementById('imageInput').onchange = (e) => {
             if (e.target.files[0]) {
@@ -238,20 +263,91 @@
             document.getElementById('submitBtn').disabled = false;
         };
 
-        // --- QUẢN LÝ TRẠNG THÁI UI LOCAL (Chống nhảy giao diện) ---
-        window.replyToggleStates = window.replyToggleStates || {}; // Nhớ trạng thái mở/đóng của từng Reply
+        // --- QUẢN LÝ ẢNH BÌNH LUẬN LOCAL ---
+        window.cmtImageFiles = {}; // Lưu ảnh Base64 cho ô comment của từng bài đăng
+        window.handleCmtImg = (e, pid) => {
+            if (e.target.files[0]) {
+                const r = new FileReader();
+                r.onload = (ev) => { 
+                    window.cmtImageFiles[pid] = ev.target.result; 
+                    document.getElementById(`cmt-preview-img-${pid}`).src = window.cmtImageFiles[pid]; 
+                    document.getElementById(`cmt-preview-box-${pid}`).style.display = 'block'; 
+                }
+                r.readAsDataURL(e.target.files[0]);
+            }
+        }
+        window.removeCmtImg = (pid) => {
+            window.cmtImageFiles[pid] = null;
+            document.getElementById(`cmt-img-input-${pid}`).value = '';
+            document.getElementById(`cmt-preview-box-${pid}`).style.display = 'none';
+        }
 
+        // --- LOGIC TẠO BÌNH LUẬN (Render) ---
+        function createCommentHTML(c, pid, postAuthor, repliesLength = 0) {
+            // Huy hiệu Tác giả
+            const authorBadge = c.author === postAuthor ? `<span class="author-badge"><i class="fa-solid fa-pen-nib"></i> Tác giả</span>` : '';
+            // Nút sửa xóa của chủ cmt
+            const cMenu = c.author === myName ? `<div class="cmt-actions-menu"><i class="fa-solid fa-pen" onclick="editCmt('${pid}','${c.id}')"></i> <i class="fa-solid fa-trash" onclick="delCmt('${pid}','${c.id}')"></i></div>` : '';
+            // Ảnh đính kèm
+            const cImg = c.imageBase64 ? `<img src="${c.imageBase64}" class="cmt-image" onclick="window.open('${c.imageBase64}', '_blank')">` : '';
+            
+            // Xử lý Cảm xúc bình luận
+            const reacts = c.reactions || {};
+            const rUsers = Object.keys(reacts);
+            const myReact = reacts[myName];
+            
+            // Bong bóng hiện cảm xúc ở góc
+            let bubbleHTML = '';
+            if (rUsers.length > 0) {
+                // Lấy icon xuất hiện nhiều nhất hoặc icon đầu tiên làm đại diện
+                const topIcon = window.emojis[reacts[rUsers[0]]] || '👍';
+                bubbleHTML = `<div class="cmt-reaction-bubble" onclick="showCmtReactions('${pid}', '${c.id}')">${topIcon} ${rUsers.length}</div>`;
+            }
+
+            // Chữ "Thích" xanh đỏ
+            const reactTextClass = myReact ? 'cmt-reacted-text' : '';
+            const reactText = myReact ? 'Đã thích' : 'Thích';
+
+            return `
+                <div class="comment">
+                    <img src="${c.avatar}" class="avatar" style="width: 32px; height: 32px;">
+                    <div class="comment-content-wrap">
+                        <div class="comment-body">
+                            <div class="comment-author">${c.author} ${authorBadge}</div>
+                            <div class="comment-text" id="cmt-text-${c.id}">${c.text}</div>
+                            ${cImg}
+                            ${bubbleHTML}
+                            ${cMenu}
+                        </div>
+                        <div class="comment-actions">
+                            <div class="cmt-react-btn-wrapper">
+                                <span class="${reactTextClass}" onclick="reactCmt('${pid}', '${c.id}', 'like')">${reactText}</span>
+                                <div class="cmt-reaction-bar">
+                                    <span class="cmt-react-bar-icon" onclick="reactCmt('${pid}', '${c.id}', 'like')">👍</span>
+                                    <span class="cmt-react-bar-icon" onclick="reactCmt('${pid}', '${c.id}', 'love')">❤️</span>
+                                    <span class="cmt-react-bar-icon" onclick="reactCmt('${pid}', '${c.id}', 'haha')">😂</span>
+                                    <span class="cmt-react-bar-icon" onclick="reactCmt('${pid}', '${c.id}', 'sad')">😢</span>
+                                    <span class="cmt-react-bar-icon" onclick="reactCmt('${pid}', '${c.id}', 'angry')">😡</span>
+                                </div>
+                            </div>
+                            <span onclick="openReply('${pid}', '${c.id}', '${c.author}')">Phản hồi</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // --- REALTIME RENDER ---
+        window.replyToggleStates = window.replyToggleStates || {}; 
         const feedContainer = document.getElementById('feedContainer');
-        const emojis = { like: '👍', love: '❤️', haha: '😂', sad: '😢', angry: '😡' };
+        window.emojis = { like: '👍', love: '❤️', haha: '😂', sad: '😢', angry: '😡' };
 
         onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (snapshot) => {
             snapshot.docChanges().forEach((change) => {
-                const post = change.doc.data();
-                const pid = change.doc.id;
-                
+                const post = change.doc.data(); const pid = change.doc.id;
                 if (change.type === "added") {
-                    const postDiv = document.createElement('div');
-                    postDiv.id = `post-${pid}`; postDiv.className = 'card'; feedContainer.appendChild(postDiv);
+                    const postDiv = document.createElement('div'); postDiv.id = `post-${pid}`; postDiv.className = 'card'; feedContainer.appendChild(postDiv);
                     renderPost(postDiv, pid, post, false);
                 } 
                 if (change.type === "modified") {
@@ -278,14 +374,14 @@
             if (post.createdAt) timeStr = post.createdAt.toDate().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
 
             const reactions = post.reactions || {}; const rUsers = Object.keys(reactions); const myReaction = reactions[myName];
-            let rText = rUsers.length > 0 ? `<div class="reaction-count" onclick="showReactions('${pid}')">${emojis[reactions[rUsers[0]]] || '👍'} ${rUsers.length}</div>` : '';
+            let rText = rUsers.length > 0 ? `<div class="reaction-count" onclick="showReactions('${pid}')">${window.emojis[reactions[rUsers[0]]] || '👍'} ${rUsers.length}</div>` : '';
             
             const statsHTML = `
                 ${rText}
                 <div class="post-stats">
                     <div class="reaction-btn-wrapper">
                         <button class="action-btn ${myReaction ? 'reacted' : ''}" onclick="react('${pid}', 'like')">
-                            ${myReaction ? emojis[myReaction] : '<i class="fa-regular fa-thumbs-up"></i>'} ${myReaction ? 'Đã thích' : 'Thích'}
+                            ${myReaction ? window.emojis[myReaction] : '<i class="fa-regular fa-thumbs-up"></i>'} ${myReaction ? 'Đã thích' : 'Thích'}
                         </button>
                         <div class="reaction-bar">
                             <span class="react-icon" onclick="react('${pid}', 'like')">👍</span>
@@ -304,25 +400,15 @@
             const cmts = post.comments || [];
             const mainCmts = cmts.filter(c => !c.replyTo);
             const showAll = container.dataset.showAll === 'true';
-            const cmtsToShow = showAll ? mainCmts : mainCmts.slice(-3); // Mặc định hiện 3 cmt mới nhất
+            const cmtsToShow = showAll ? mainCmts : mainCmts.slice(-3);
 
             let cmtListHTML = '';
             cmtsToShow.forEach(c => {
                 const replies = cmts.filter(rep => rep.replyTo === c.id);
                 let replyHTML = '';
-                
-                replies.forEach(r => {
-                    const rMenu = r.author === myName ? `<div class="cmt-actions-menu"><i class="fa-solid fa-pen" onclick="editCmt('${pid}','${r.id}')"></i> <i class="fa-solid fa-trash" onclick="delCmt('${pid}','${r.id}')"></i></div>` : '';
-                    replyHTML += `
-                        <div class="comment">
-                            <img src="${r.avatar}" class="avatar" style="width: 24px; height: 24px;">
-                            <div class="comment-content-wrap">
-                                <div class="comment-body"><div class="comment-author">${r.author}</div><div class="comment-text" id="cmt-text-${r.id}">${r.text}</div>${rMenu}</div>
-                            </div>
-                        </div>`;
-                });
+                replies.forEach(r => { replyHTML += createCommentHTML(r, pid, post.author); }); // Tái sử dụng hàm
 
-                const isRepOpen = window.replyToggleStates[c.id]; // Kiểm tra trạng thái đóng/mở
+                const isRepOpen = window.replyToggleStates[c.id];
                 const replySection = replies.length > 0 ? `
                     <div class="replies-wrapper">
                         <div class="toggle-replies-btn" onclick="toggleReplies('${c.id}')" id="btn-rep-${c.id}">
@@ -334,16 +420,9 @@
                     </div>
                 ` : '';
 
-                const cMenu = c.author === myName ? `<div class="cmt-actions-menu"><i class="fa-solid fa-pen" onclick="editCmt('${pid}','${c.id}')"></i> <i class="fa-solid fa-trash" onclick="delCmt('${pid}','${c.id}')"></i></div>` : '';
                 cmtListHTML += `
                     <div class="comment-thread">
-                        <div class="comment">
-                            <img src="${c.avatar}" class="avatar" style="width: 32px; height: 32px;">
-                            <div class="comment-content-wrap">
-                                <div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text" id="cmt-text-${c.id}">${c.text}</div>${cMenu}</div>
-                                <div class="comment-actions"><span onclick="openReply('${pid}', '${c.id}', '${c.author}')">Phản hồi</span></div>
-                            </div>
-                        </div>
+                        ${createCommentHTML(c, pid, post.author, replies.length)}
                         ${replySection}
                     </div>`;
             });
@@ -370,18 +449,34 @@
                     ${post.imageBase64 ? `<img src="${post.imageBase64}" class="post-image">` : ''}
                 </div>
                 <div id="stats-${pid}">${statsHTML}</div>
+                
                 <div class="comments-section" id="csec-${pid}" style="display: none;">
                     <div class="comment-list-wrapper" id="cmt-list-${pid}">${cmtListHTML}</div>
+                    
                     <div class="add-comment">
                         <img src="${myAvatar}" class="avatar" style="width: 32px; height: 32px;">
-                        <input type="text" id="input-${pid}" placeholder="Viết bình luận..." onkeypress="handleEnter(event, '${pid}')">
+                        
+                        <div class="add-comment-wrap">
+                            <div class="cmt-preview-box" id="cmt-preview-box-${pid}">
+                                <img id="cmt-preview-img-${pid}" src="">
+                                <div class="remove-cmt-img" onclick="removeCmtImg('${pid}')"><i class="fa-solid fa-xmark"></i></div>
+                            </div>
+                            <div class="add-comment-inputs">
+                                <input type="text" id="input-${pid}" placeholder="Viết bình luận..." onkeypress="handleEnter(event, '${pid}')">
+                                <label title="Đính kèm ảnh">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <input type="file" accept="image/*" id="cmt-img-input-${pid}" onchange="handleCmtImg(event, '${pid}')">
+                                </label>
+                            </div>
+                        </div>
+                        
                         <button class="send-btn" onclick="sendCmt('${pid}')"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
             `;
         }
 
-        // --- CÁC HÀM XỬ LÝ (Không thay đổi logic Firebase) ---
+        // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
         window.toggleReplies = (cmtId) => {
             window.replyToggleStates[cmtId] = !window.replyToggleStates[cmtId];
             const cont = document.getElementById(`rep-cont-${cmtId}`);
@@ -398,16 +493,44 @@
             const post = await window.getDoc(ref);
             if(post.data().reactions?.[myName] === type) {
                 await window.updateDoc(ref, { [`reactions.${myName}`]: (await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js")).deleteField() });
-            } else {
-                await window.updateDoc(ref, { [`reactions.${myName}`]: type });
+            } else { await window.updateDoc(ref, { [`reactions.${myName}`]: type }); }
+        };
+
+        // Hàm thả cảm xúc cho Bình luận
+        window.reactCmt = async (pid, cmtId, type) => {
+            const ref = window.doc(window.db, "posts", pid);
+            const post = await window.getDoc(ref);
+            const cmts = post.data().comments;
+            const cIndex = cmts.findIndex(c => c.id === cmtId);
+            
+            if(cIndex > -1) {
+                if(!cmts[cIndex].reactions) cmts[cIndex].reactions = {}; // Khởi tạo nếu chưa có
+                
+                // Bấm lại đúng cảm xúc đó thì là Hủy
+                if(cmts[cIndex].reactions[myName] === type) {
+                    delete cmts[cIndex].reactions[myName];
+                } else {
+                    cmts[cIndex].reactions[myName] = type;
+                }
+                await window.updateDoc(ref, { comments: cmts });
             }
         };
+
+        // Xem ai thả cảm xúc Bình luận
+        window.showCmtReactions = async (pid, cmtId) => {
+            const post = await window.getDoc(window.doc(window.db, "posts", pid));
+            const cmt = post.data().comments.find(c => c.id === cmtId);
+            const reacts = cmt.reactions || {};
+            let html = '';
+            for (let [user, type] of Object.entries(reacts)) { html += `<div class="reactor-item"><div class="reactor-info"><span>${window.emojis[type]}</span> ${user}</div></div>`; }
+            document.getElementById('reactionsList').innerHTML = html; document.getElementById('reactionsModal').style.display = 'flex';
+        }
 
         window.showReactions = async (pid) => {
             const post = await window.getDoc(window.doc(window.db, "posts", pid));
             const reacts = post.data().reactions || {};
             let html = '';
-            for (let [user, type] of Object.entries(reacts)) { html += `<div class="reactor-item"><div class="reactor-info"><span>${emojis[type]}</span> ${user}</div></div>`; }
+            for (let [user, type] of Object.entries(reacts)) { html += `<div class="reactor-item"><div class="reactor-info"><span>${window.emojis[type]}</span> ${user}</div></div>`; }
             document.getElementById('reactionsList').innerHTML = html; document.getElementById('reactionsModal').style.display = 'flex';
         };
 
@@ -425,7 +548,6 @@
         window.replyStates = {};
         window.openReply = (pid, cmtId, authorName) => {
             window.replyStates[pid] = cmtId;
-            // Tự động mở reply box ra để nhìn thấy tin nhắn mình sắp gửi
             window.replyToggleStates[cmtId] = true; 
             const input = document.getElementById(`input-${pid}`);
             input.value = `@${authorName} `; input.focus();
@@ -436,11 +558,23 @@
         window.sendCmt = async (pid) => {
             const input = document.getElementById(`input-${pid}`);
             const text = input.value.trim();
-            if(!text) return;
-            const newCmt = { id: Date.now().toString(), author: myName, avatar: myAvatar, text: text, replyTo: window.replyStates[pid] || null };
+            const imgBase64 = window.cmtImageFiles[pid];
+            
+            if(!text && !imgBase64) return;
+            
+            const newCmt = { 
+                id: Date.now().toString(), 
+                author: myName, 
+                avatar: myAvatar, 
+                text: text, 
+                replyTo: window.replyStates[pid] || null,
+                imageBase64: imgBase64 || null,
+                reactions: {}
+            };
+
             try {
                 await window.updateDoc(window.doc(window.db, "posts", pid), { comments: window.arrayUnion(newCmt) });
-                input.value = ''; window.replyStates[pid] = null;
+                input.value = ''; window.replyStates[pid] = null; window.removeCmtImg(pid); // Gửi xong xóa ảnh và chữ
             } catch (error) { console.error(error); alert("Lỗi gửi bình luận!"); }
         };
 
