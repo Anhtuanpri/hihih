@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Góc Nhỏ Của Chúng Mình</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CSS BO GÓC & KHÓA VỊ TRÍ --- */
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #050505; --muted: #65676b; --primary: #1877f2; --hover: #166fe5; --border: #ced0d4; --bg-cmt: #f0f2f5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; overflow-y: scroll; }
+        button { cursor: pointer; border: none; background: none; font-family: inherit; }
+        
+        header { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; padding: 10px 20px; display: flex; justify-content: center; }
+        .header-content { width: 100%; max-width: 680px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; padding: 5px 10px; border-radius: 20px; transition: 0.2s;}
+        .user-profile:hover { background: var(--bg-cmt); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        
+        main { width: 100%; max-width: 680px; margin: 20px auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative;}
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; cursor: pointer; color: var(--muted); background: var(--bg-cmt); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;}
+        
+        .avatar-preview-box { width: 100px; height: 100px; border-radius: 50%; background: var(--bg-cmt); margin: 0 auto 15px; overflow: hidden; border: 2px dashed var(--border); display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .avatar-preview-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .modal-content input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-size: 1rem; outline: none; }
+        .save-btn { width: 100%; background: var(--primary); color: white; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; }
+
+        /* Card Bài Đăng */
+        .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding: 15px; display: flex; flex-direction: column; }
+        .create-post { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; align-items: center;}
+        .create-post textarea { flex: 1; border: none; background: var(--bg-cmt); border-radius: 20px; padding: 10px 15px; font-size: 1rem; resize: none; outline: none; }
+        
+        #imagePreviewContainer { width: 100%; display: none; margin-top: 10px; position: relative; }
+        #imagePreview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; }
+        #removeImageBtn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        
+        .post-actions-create { display: flex; justify-content: space-between; align-items: center; }
+        .upload-btn { color: #45bd62; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s;}
+        .upload-btn:hover { background: var(--bg-cmt); }
+        .upload-btn input { display: none; }
+        .submit-btn { background: var(--primary); color: white; padding: 8px 20px; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .post-info-wrap { display: flex; gap: 10px; align-items: center; }
+        .post-author { font-weight: 600; font-size: 0.95rem; }
+        .post-time { font-size: 0.8rem; color: var(--muted); }
+        .post-content p { margin-bottom: 15px; font-size: 1rem; white-space: pre-wrap; word-break: break-word; }
+        .post-image { width: 100%; border-radius: 8px; margin-bottom: 15px; max-height: 500px; object-fit: contain; background: #000; }
+        
+        .reaction-count { font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; padding: 5px; border-radius: 5px; }
+        .reaction-count:hover { text-decoration: underline; background: var(--bg-cmt); }
+        
+        /* KHÓA VỊ TRÍ NÚT THÍCH/BÌNH LUẬN CHỐNG LỆCH */
+        .post-stats { display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 4px 0; margin-bottom: 15px; position: relative; gap: 5px; }
+        .reaction-btn-wrapper { flex: 1; display: flex; position: relative; }
+        .action-btn { flex: 1; padding: 8px 0; display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; border-radius: 6px; white-space: nowrap; font-size: 0.95rem; }
+        .action-btn:hover { background: var(--bg-cmt); }
+        .action-btn.reacted { color: var(--primary); }
+
+        .reaction-bar { display: none; position: absolute; bottom: 100%; left: 0; background: white; border-radius: 30px; padding: 5px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); gap: 10px; z-index: 10; margin-bottom: 5px;}
+        .reaction-btn-wrapper:hover .reaction-bar { display: flex; }
+        .react-icon { font-size: 1.5rem; cursor: pointer; transition: transform 0.2s; }
+        .react-icon:hover { transform: scale(1.3); }
+
+        /* KHU VỰC BÌNH LUẬN ĐƯỢC TỔ CHỨC LẠI */
+        .comments-section { display: none; flex-direction: column; gap: 15px; }
+        .comment-list-wrapper { display: flex; flex-direction: column; gap: 15px; }
+        .comment-thread { display: flex; flex-direction: column; gap: 5px; }
+        .comment { display: flex; gap: 8px; position: relative; width: 100%; }
+        
+        .comment-content-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: calc(100% - 40px); }
+        .comment-body { background: var(--bg-cmt); padding: 8px 12px; border-radius: 18px; display: inline-block; word-break: break-word; position: relative; }
+        .comment-author { font-weight: 600; font-size: 0.9rem; line-height: 1.2; margin-bottom: 3px; }
+        .comment-text { font-size: 0.95rem; line-height: 1.3; }
+        
+        .cmt-actions-menu { display: none; position: absolute; right: -45px; top: 50%; transform: translateY(-50%); gap: 10px; font-size: 0.8rem; color: var(--muted); background: white; padding: 5px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5;}
+        .comment-body:hover .cmt-actions-menu { display: flex; }
+        .cmt-actions-menu i { cursor: pointer; }
+        .cmt-actions-menu i:hover { color: var(--text); }
+
+        .comment-actions { padding-left: 12px; font-size: 0.75rem; color: var(--muted); font-weight: 600; display: flex; gap: 15px; margin-top: 3px; }
+        .comment-actions span { cursor: pointer; }
+        .comment-actions span:hover { text-decoration: underline; }
+
+        /* Thiết kế hiển thị Reply thông minh */
+        .replies-wrapper { margin-left: 40px; margin-top: 5px; border-left: 2px solid #e4e6eb; padding-left: 10px; display: flex; flex-direction: column; gap: 5px;}
+        .toggle-replies-btn { font-size: 0.85rem; color: var(--muted); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+        .toggle-replies-btn:hover { text-decoration: underline; color: var(--text); }
+        .replies-container { display: none; flex-direction: column; gap: 10px; } /* Mặc định ẨN */
+
+        .add-comment { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+        .add-comment input { flex: 1; background: var(--bg-cmt); border: none; padding: 10px 15px; border-radius: 20px; outline: none; font-size: 0.95rem; }
+        .send-btn { color: var(--primary); font-size: 1.2rem; padding: 5px; flex-shrink: 0; }
+        
+        .toggle-comments-btn { color: var(--muted); cursor: pointer; font-size: 0.95rem; font-weight: 600; margin-top: 10px; }
+        .toggle-comments-btn:hover { text-decoration: underline; }
+
+        .reactor-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bg-cmt); }
+        .reactor-info { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <h3>Thiết lập hồ sơ</h3>
+            <label class="avatar-preview-box">
+                <i class="fa-solid fa-camera fa-2x" style="color: #aaa;" id="cameraIcon"></i>
+                <img id="myAvatarPreview" src="">
+                <input type="file" accept="image/*" id="myAvatarInput" style="display: none;">
+            </label>
+            <input type="text" id="myNameInput" placeholder="Nhập tên của bạn (VD: Nguyễn Xuân Trường)">
+            <button class="save-btn" id="saveProfileBtn">Lưu & Bắt Đầu</button>
+        </div>
+    </div>
+
+    <div id="reactionsModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="document.getElementById('reactionsModal').style.display='none'"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom: 15px; text-align: left; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Lượt tương tác</h3>
+            <div id="reactionsList"></div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">Góc Nhỏ</div>
+            <div class="user-profile" id="headerProfileBtn">
+                <img src="" class="avatar" id="headerAvatar">
+                <span id="headerName">Khách</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <div class="create-post">
+                <img src="" class="avatar current-user-avatar">
+                <textarea id="postContentInput" rows="2" placeholder="Bạn đang nghĩ gì thế?"></textarea>
+            </div>
+            <div id="imagePreviewContainer">
+                <img id="imagePreview">
+                <div id="removeImageBtn"><i class="fa-solid fa-xmark"></i></div>
+            </div>
+            <div class="post-actions-create">
+                <label class="upload-btn">
+                    <i class="fa-solid fa-image"></i> Ảnh
+                    <input type="file" accept="image/*" id="imageInput">
+                </label>
+                <button class="submit-btn" id="submitBtn">Đăng bài</button>
+            </div>
+        </div>
+
+        <div id="feedContainer"></div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, arrayUnion, getDoc } 
+        from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEhTP80aqABbIbjlTAjO-_OhVyfzJCMmY",
+            authDomain: "posting2-7bd14.firebaseapp.com",
+            projectId: "posting2-7bd14",
+            storageBucket: "posting2-7bd14.firebasestorage.app",
+            messagingSenderId: "733913038825",
+            appId: "1:733913038825:web:a6d497014f5b6003771578"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.db = db; window.updateDoc = updateDoc; window.arrayUnion = arrayUnion; window.getDoc = getDoc; window.deleteDoc = deleteDoc; window.doc = doc;
+
+        // --- TÀI KHOẢN ---
+        let myName = localStorage.getItem('myName');
+        let myAvatar = localStorage.getItem('myAvatar');
+        
+        if (!myName) document.getElementById('profileModal').style.display = 'flex';
+        else updateUIWithUserData();
+
+        document.getElementById('headerProfileBtn').onclick = () => {
+            document.getElementById('myNameInput').value = myName || '';
+            if(myAvatar) { document.getElementById('myAvatarPreview').src = myAvatar; document.getElementById('myAvatarPreview').style.display = 'block'; document.getElementById('cameraIcon').style.display = 'none'; }
+            document.getElementById('profileModal').style.display = 'flex';
+        };
+
+        let tempAvatar = null;
+        document.getElementById('myAvatarInput').onchange = (e) => {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    tempAvatar = ev.target.result; document.getElementById('myAvatarPreview').src = tempAvatar; document.getElementById('myAvatarPreview').style.display = 'block'; document.getElementById('cameraIcon').style.display = 'none';
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+
+        document.getElementById('saveProfileBtn').onclick = () => {
+            const nameVal = document.getElementById('myNameInput').value.trim();
+            if (!nameVal) return alert("Nhập tên đi bạn ơi!");
+            myName = nameVal; myAvatar = tempAvatar || myAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(myName)}&background=random`;
+            localStorage.setItem('myName', myName); localStorage.setItem('myAvatar', myAvatar);
+            document.getElementById('profileModal').style.display = 'none'; updateUIWithUserData();
+        };
+
+        function updateUIWithUserData() {
+            document.getElementById('headerName').innerText = myName; document.getElementById('headerAvatar').src = myAvatar; document.querySelectorAll('.current-user-avatar').forEach(img => img.src = myAvatar);
+        }
+
+        // --- ĐĂNG BÀI ---
+        let currentImg = null;
+        document.getElementById('imageInput').onchange = (e) => {
+            if (e.target.files[0]) {
+                const r = new FileReader();
+                r.onload = (ev) => { currentImg = ev.target.result; document.getElementById('imagePreview').src = currentImg; document.getElementById('imagePreviewContainer').style.display = 'block'; }
+                r.readAsDataURL(e.target.files[0]);
+            }
+        };
+        document.getElementById('removeImageBtn').onclick = () => { currentImg = null; document.getElementById('imageInput').value = ''; document.getElementById('imagePreviewContainer').style.display = 'none'; };
+
+        document.getElementById('submitBtn').onclick = async () => {
+            const txt = document.getElementById('postContentInput').value.trim();
+            if (!txt && !currentImg) return;
+            document.getElementById('submitBtn').disabled = true;
+            try {
+                await addDoc(collection(db, "posts"), { author: myName, avatar: myAvatar, content: txt, imageBase64: currentImg, reactions: {}, comments: [], createdAt: serverTimestamp() });
+                document.getElementById('postContentInput').value = ''; document.getElementById('removeImageBtn').click();
+            } catch (e) { alert("Lỗi mạng!"); }
+            document.getElementById('submitBtn').disabled = false;
+        };
+
+        // --- QUẢN LÝ TRẠNG THÁI UI LOCAL (Chống nhảy giao diện) ---
+        window.replyToggleStates = window.replyToggleStates || {}; // Nhớ trạng thái mở/đóng của từng Reply
+
+        const feedContainer = document.getElementById('feedContainer');
+        const emojis = { like: '👍', love: '❤️', haha: '😂', sad: '😢', angry: '😡' };
+
+        onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const post = change.doc.data();
+                const pid = change.doc.id;
+                
+                if (change.type === "added") {
+                    const postDiv = document.createElement('div');
+                    postDiv.id = `post-${pid}`; postDiv.className = 'card'; feedContainer.appendChild(postDiv);
+                    renderPost(postDiv, pid, post, false);
+                } 
+                if (change.type === "modified") {
+                    const postDiv = document.getElementById(`post-${pid}`);
+                    if(postDiv) renderPost(postDiv, pid, post, true); 
+                }
+                if (change.type === "removed") {
+                    const postDiv = document.getElementById(`post-${pid}`);
+                    if(postDiv) postDiv.remove();
+                }
+            });
+            
+            const cards = Array.from(feedContainer.children);
+            cards.sort((a, b) => {
+                const tA = snapshot.docs.find(d => d.id === a.id.replace('post-',''))?.data().createdAt?.toMillis() || 0;
+                const tB = snapshot.docs.find(d => d.id === b.id.replace('post-',''))?.data().createdAt?.toMillis() || 0;
+                return tB - tA;
+            });
+            cards.forEach(card => feedContainer.appendChild(card));
+        });
+
+        function renderPost(container, pid, post, isUpdate) {
+            let timeStr = 'Vừa xong';
+            if (post.createdAt) timeStr = post.createdAt.toDate().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+
+            const reactions = post.reactions || {}; const rUsers = Object.keys(reactions); const myReaction = reactions[myName];
+            let rText = rUsers.length > 0 ? `<div class="reaction-count" onclick="showReactions('${pid}')">${emojis[reactions[rUsers[0]]] || '👍'} ${rUsers.length}</div>` : '';
+            
+            const statsHTML = `
+                ${rText}
+                <div class="post-stats">
+                    <div class="reaction-btn-wrapper">
+                        <button class="action-btn ${myReaction ? 'reacted' : ''}" onclick="react('${pid}', 'like')">
+                            ${myReaction ? emojis[myReaction] : '<i class="fa-regular fa-thumbs-up"></i>'} ${myReaction ? 'Đã thích' : 'Thích'}
+                        </button>
+                        <div class="reaction-bar">
+                            <span class="react-icon" onclick="react('${pid}', 'like')">👍</span>
+                            <span class="react-icon" onclick="react('${pid}', 'love')">❤️</span>
+                            <span class="react-icon" onclick="react('${pid}', 'haha')">😂</span>
+                            <span class="react-icon" onclick="react('${pid}', 'sad')">😢</span>
+                            <span class="react-icon" onclick="react('${pid}', 'angry')">😡</span>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="toggleCmtBox('${pid}')">
+                        <i class="fa-regular fa-comment"></i> ${post.comments ? post.comments.length : 0} Bình luận
+                    </button>
+                </div>
+            `;
+
+            const cmts = post.comments || [];
+            const mainCmts = cmts.filter(c => !c.replyTo);
+            const showAll = container.dataset.showAll === 'true';
+            const cmtsToShow = showAll ? mainCmts : mainCmts.slice(-3); // Mặc định hiện 3 cmt mới nhất
+
+            let cmtListHTML = '';
+            cmtsToShow.forEach(c => {
+                const replies = cmts.filter(rep => rep.replyTo === c.id);
+                let replyHTML = '';
+                
+                replies.forEach(r => {
+                    const rMenu = r.author === myName ? `<div class="cmt-actions-menu"><i class="fa-solid fa-pen" onclick="editCmt('${pid}','${r.id}')"></i> <i class="fa-solid fa-trash" onclick="delCmt('${pid}','${r.id}')"></i></div>` : '';
+                    replyHTML += `
+                        <div class="comment">
+                            <img src="${r.avatar}" class="avatar" style="width: 24px; height: 24px;">
+                            <div class="comment-content-wrap">
+                                <div class="comment-body"><div class="comment-author">${r.author}</div><div class="comment-text" id="cmt-text-${r.id}">${r.text}</div>${rMenu}</div>
+                            </div>
+                        </div>`;
+                });
+
+                const isRepOpen = window.replyToggleStates[c.id]; // Kiểm tra trạng thái đóng/mở
+                const replySection = replies.length > 0 ? `
+                    <div class="replies-wrapper">
+                        <div class="toggle-replies-btn" onclick="toggleReplies('${c.id}')" id="btn-rep-${c.id}">
+                            <i class="fa-solid fa-reply fa-rotate-180"></i> ${isRepOpen ? 'Ẩn phản hồi' : `Xem ${replies.length} phản hồi`}
+                        </div>
+                        <div class="replies-container" id="rep-cont-${c.id}" style="display: ${isRepOpen ? 'flex' : 'none'};">
+                            ${replyHTML}
+                        </div>
+                    </div>
+                ` : '';
+
+                const cMenu = c.author === myName ? `<div class="cmt-actions-menu"><i class="fa-solid fa-pen" onclick="editCmt('${pid}','${c.id}')"></i> <i class="fa-solid fa-trash" onclick="delCmt('${pid}','${c.id}')"></i></div>` : '';
+                cmtListHTML += `
+                    <div class="comment-thread">
+                        <div class="comment">
+                            <img src="${c.avatar}" class="avatar" style="width: 32px; height: 32px;">
+                            <div class="comment-content-wrap">
+                                <div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text" id="cmt-text-${c.id}">${c.text}</div>${cMenu}</div>
+                                <div class="comment-actions"><span onclick="openReply('${pid}', '${c.id}', '${c.author}')">Phản hồi</span></div>
+                            </div>
+                        </div>
+                        ${replySection}
+                    </div>`;
+            });
+
+            const toggleBtn = (!showAll && mainCmts.length > 3) ? `<div class="toggle-comments-btn" onclick="toggleAllCmts('${pid}')">Xem thêm ${mainCmts.length - 3} bình luận...</div>` : (showAll && mainCmts.length > 3 ? `<div class="toggle-comments-btn" onclick="toggleAllCmts('${pid}')">Ẩn bớt bình luận</div>` : '');
+            cmtListHTML += toggleBtn;
+
+            if (isUpdate) {
+                document.getElementById(`stats-${pid}`).innerHTML = statsHTML;
+                document.getElementById(`cmt-list-${pid}`).innerHTML = cmtListHTML;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="post-header">
+                    <div class="post-info-wrap">
+                        <img src="${post.avatar}" class="avatar">
+                        <div><div class="post-author">${post.author}</div><div class="post-time">${timeStr}</div></div>
+                    </div>
+                    ${post.author === myName ? `<i class="fa-solid fa-ellipsis" style="cursor:pointer; color:var(--muted)" onclick="delPost('${pid}')" title="Xóa bài"></i>` : ''}
+                </div>
+                <div class="post-content">
+                    <p>${post.content}</p>
+                    ${post.imageBase64 ? `<img src="${post.imageBase64}" class="post-image">` : ''}
+                </div>
+                <div id="stats-${pid}">${statsHTML}</div>
+                <div class="comments-section" id="csec-${pid}" style="display: none;">
+                    <div class="comment-list-wrapper" id="cmt-list-${pid}">${cmtListHTML}</div>
+                    <div class="add-comment">
+                        <img src="${myAvatar}" class="avatar" style="width: 32px; height: 32px;">
+                        <input type="text" id="input-${pid}" placeholder="Viết bình luận..." onkeypress="handleEnter(event, '${pid}')">
+                        <button class="send-btn" onclick="sendCmt('${pid}')"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- CÁC HÀM XỬ LÝ (Không thay đổi logic Firebase) ---
+        window.toggleReplies = (cmtId) => {
+            window.replyToggleStates[cmtId] = !window.replyToggleStates[cmtId];
+            const cont = document.getElementById(`rep-cont-${cmtId}`);
+            const btn = document.getElementById(`btn-rep-${cmtId}`);
+            if(window.replyToggleStates[cmtId]){
+                cont.style.display = 'flex'; btn.innerHTML = '<i class="fa-solid fa-reply fa-rotate-180"></i> Ẩn phản hồi';
+            } else {
+                cont.style.display = 'none'; btn.innerHTML = `<i class="fa-solid fa-reply fa-rotate-180"></i> Xem phản hồi`;
+            }
+        };
+
+        window.react = async (pid, type) => {
+            const ref = window.doc(window.db, "posts", pid);
+            const post = await window.getDoc(ref);
+            if(post.data().reactions?.[myName] === type) {
+                await window.updateDoc(ref, { [`reactions.${myName}`]: (await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js")).deleteField() });
+            } else {
+                await window.updateDoc(ref, { [`reactions.${myName}`]: type });
+            }
+        };
+
+        window.showReactions = async (pid) => {
+            const post = await window.getDoc(window.doc(window.db, "posts", pid));
+            const reacts = post.data().reactions || {};
+            let html = '';
+            for (let [user, type] of Object.entries(reacts)) { html += `<div class="reactor-item"><div class="reactor-info"><span>${emojis[type]}</span> ${user}</div></div>`; }
+            document.getElementById('reactionsList').innerHTML = html; document.getElementById('reactionsModal').style.display = 'flex';
+        };
+
+        window.toggleCmtBox = (pid) => {
+            const box = document.getElementById(`csec-${pid}`);
+            if (box.style.display === 'flex') { box.style.display = 'none'; } else { box.style.display = 'flex'; document.getElementById(`input-${pid}`).focus(); }
+        };
+
+        window.toggleAllCmts = (pid) => {
+            const card = document.getElementById(`post-${pid}`);
+            card.dataset.showAll = card.dataset.showAll === 'true' ? 'false' : 'true';
+            window.updateDoc(window.doc(window.db, "posts", pid), { updatedAt: serverTimestamp() }); 
+        };
+
+        window.replyStates = {};
+        window.openReply = (pid, cmtId, authorName) => {
+            window.replyStates[pid] = cmtId;
+            // Tự động mở reply box ra để nhìn thấy tin nhắn mình sắp gửi
+            window.replyToggleStates[cmtId] = true; 
+            const input = document.getElementById(`input-${pid}`);
+            input.value = `@${authorName} `; input.focus();
+        };
+
+        window.handleEnter = (e, pid) => { if(e.key === 'Enter') sendCmt(pid); }
+
+        window.sendCmt = async (pid) => {
+            const input = document.getElementById(`input-${pid}`);
+            const text = input.value.trim();
+            if(!text) return;
+            const newCmt = { id: Date.now().toString(), author: myName, avatar: myAvatar, text: text, replyTo: window.replyStates[pid] || null };
+            try {
+                await window.updateDoc(window.doc(window.db, "posts", pid), { comments: window.arrayUnion(newCmt) });
+                input.value = ''; window.replyStates[pid] = null;
+            } catch (error) { console.error(error); alert("Lỗi gửi bình luận!"); }
+        };
+
+        window.delCmt = async (pid, cmtId) => {
+            if(!confirm("Xóa bình luận này?")) return;
+            const ref = window.doc(window.db, "posts", pid);
+            const post = await window.getDoc(ref);
+            const newCmts = post.data().comments.filter(c => c.id !== cmtId && c.replyTo !== cmtId);
+            await window.updateDoc(ref, { comments: newCmts });
+        };
+
+        window.editCmt = async (pid, cmtId) => {
+            const oldText = document.getElementById(`cmt-text-${cmtId}`).innerText;
+            const newText = prompt("Sửa bình luận:", oldText);
+            if(!newText || newText === oldText) return;
+            const ref = window.doc(window.db, "posts", pid);
+            const post = await window.getDoc(ref);
+            const cmts = post.data().comments;
+            const cIndex = cmts.findIndex(c => c.id === cmtId);
+            if(cIndex > -1) { cmts[cIndex].text = newText; await window.updateDoc(ref, { comments: cmts }); }
+        };
+
+        window.delPost = async (pid) => { if(confirm("Xóa hẳn bài viết này?")) await window.deleteDoc(window.doc(window.db, "posts", pid)); }
+    </script>
+</body>
+</html>
