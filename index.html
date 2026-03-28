@@ -698,35 +698,55 @@
             
             if(!text && !imgBase64) return;
             
-            const newCmt = { id: Date.now().toString(), author: myName, avatar: myAvatar, text: text, replyTo: window.replyStates[pid] || null, imageBase64: imgBase64 || null, reactions: {} };
+            const newCmtId = Date.now().toString();
 
             try {
                 const card = document.getElementById(`post-${pid}`);
                 if (card) card.dataset.showAll = 'true';
 
-                const postSnap = await window.getDoc(window.doc(window.db, "posts", pid));
+                const postRef = window.doc(window.db, "posts", pid);
+                const postSnap = await window.getDoc(postRef);
                 const postData = postSnap.data();
 
-                await window.updateDoc(window.doc(window.db, "posts", pid), { 
+                let finalReplyTo = window.replyStates[pid] || null;
+                let recipient = postData.author;
+                let notiMsg = 'đã bình luận về bài viết của bạn.';
+
+                if (finalReplyTo) {
+                    const targetCmt = postData.comments.find(c => c.id === finalReplyTo);
+                    if (targetCmt) {
+                        recipient = targetCmt.author;
+                        notiMsg = 'đã phản hồi bình luận của bạn.';
+                        
+                        if (targetCmt.replyTo) {
+                            finalReplyTo = targetCmt.replyTo;
+                        }
+                    }
+                }
+
+                const newCmt = { 
+                    id: newCmtId, 
+                    author: myName, 
+                    avatar: myAvatar, 
+                    text: text, 
+                    replyTo: finalReplyTo, 
+                    imageBase64: imgBase64 || null, 
+                    reactions: {} 
+                };
+
+                if (finalReplyTo) {
+                    window.replyToggleStates[finalReplyTo] = true;
+                }
+
+                await window.updateDoc(postRef, { 
                     comments: window.arrayUnion(newCmt),
                     updatedAt: serverTimestamp() 
                 });
                 
-                let recipient = postData.author;
-                let notiMsg = 'đã bình luận về bài viết của bạn.';
-
-                if (window.replyStates[pid]) {
-                    const parentCmt = postData.comments.find(c => c.id === window.replyStates[pid]);
-                    if (parentCmt) {
-                        recipient = parentCmt.author;
-                        notiMsg = 'đã phản hồi bình luận của bạn.';
-                    }
-                }
-                
                 window.sendNotification(recipient, notiMsg, pid);
 
                 input.value = ''; window.replyStates[pid] = null; window.removeCmtImg(pid); 
-            } catch (error) { alert("Lỗi kết nối"); }
+            } catch (error) { alert("Lỗi kết nối mạng"); }
         };
 
         window.delCmt = async (pid, cmtId) => {
