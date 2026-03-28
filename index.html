@@ -21,7 +21,12 @@
         .noti-icon { font-size: 1.3rem; color: var(--text); cursor: pointer; background: var(--bg-cmt); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
         .noti-icon:hover { background: #e4e6eb; }
         .noti-badge { position: absolute; top: -2px; right: -2px; background: #e41e3f; color: white; font-size: 0.75rem; font-weight: bold; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; display: none; }
-        .noti-dropdown { display: none; position: absolute; top: 50px; right: 0; background: white; width: 320px; max-height: 400px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; z-index: 200; flex-direction: column; padding: 8px; }
+        
+        .noti-dropdown { display: none; position: absolute; top: 50px; right: -10px; width: 320px; max-width: calc(100vw - 20px); max-height: 400px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; z-index: 200; flex-direction: column; padding: 8px; background: white;}
+        @media (max-width: 500px) {
+            .noti-dropdown { position: fixed; top: 60px; right: 10px; left: auto; width: calc(100vw - 20px); }
+        }
+
         .noti-header { font-weight: 700; font-size: 1.1rem; padding: 5px 10px 10px; }
         .noti-item { padding: 10px; border-radius: 8px; font-size: 0.9rem; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: 0.2s; }
         .noti-item:hover { background: var(--bg-cmt); }
@@ -271,7 +276,7 @@
 
         document.getElementById('saveProfileBtn').onclick = () => {
             const nameVal = document.getElementById('myNameInput').value.trim();
-            if (!nameVal) return alert("Nhập tên đi bạn ơi!");
+            if (!nameVal) return alert("Vui lòng nhập tên!");
             myName = nameVal; myAvatar = tempAvatar || myAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(myName)}&background=random`;
             localStorage.setItem('myName', myName); localStorage.setItem('myAvatar', myAvatar);
             document.getElementById('profileModal').style.display = 'none'; updateUIWithUserData();
@@ -311,7 +316,7 @@
                 let html = '';
 
                 if (notis.length === 0) {
-                    html = '<div style="text-align:center; padding:15px; color:var(--muted); font-size:0.9rem;">Bạn chưa có thông báo nào</div>';
+                    html = '<div style="text-align:center; padding:15px; color:var(--muted); font-size:0.9rem;">Không có thông báo mới</div>';
                 } else {
                     notis.forEach(n => {
                         const timeStr = n.createdAt ? n.createdAt.toDate().toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : 'Vừa xong';
@@ -341,8 +346,19 @@
             try {
                 await window.updateDoc(window.doc(window.db, "notifications", nid), { read: true });
                 document.getElementById('notiDropdown').style.display = 'none';
+                
                 const postEl = document.getElementById(`post-${postId}`);
-                if(postEl) postEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                if(postEl) {
+                    postEl.dataset.showAll = 'true';
+                    const box = document.getElementById(`csec-${postId}`);
+                    if (box) box.style.display = 'flex';
+                    
+                    await window.updateDoc(window.doc(window.db, "posts", postId), { updatedAt: serverTimestamp() });
+                    
+                    setTimeout(() => {
+                        postEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    }, 500);
+                }
             } catch (e) { console.error(e); }
         };
 
@@ -375,7 +391,7 @@
             try {
                 await addDoc(collection(db, "posts"), { author: myName, avatar: myAvatar, content: txt, imageBase64: currentImg, reactions: {}, comments: [], createdAt: serverTimestamp() });
                 document.getElementById('postContentInput').value = ''; document.getElementById('removeImageBtn').click();
-            } catch (e) { alert("Lỗi mạng!"); }
+            } catch (e) { alert("Lỗi kết nối mạng"); }
             document.getElementById('submitBtn').disabled = false;
         };
 
@@ -652,8 +668,25 @@
         window.replyStates = {};
         window.openReply = (pid, cmtId, authorName) => {
             window.replyStates[pid] = cmtId; window.replyToggleStates[cmtId] = true; 
+            
+            const card = document.getElementById(`post-${pid}`);
+            if (card) card.dataset.showAll = 'true';
+
+            const box = document.getElementById(`csec-${pid}`);
+            if (box) box.style.display = 'flex';
+
+            const cont = document.getElementById(`rep-cont-${cmtId}`);
+            const btn = document.getElementById(`btn-rep-${cmtId}`);
+            if(cont) cont.style.display = 'flex';
+            if(btn) btn.innerHTML = '<i class="fa-solid fa-reply fa-rotate-180"></i> Ẩn phản hồi';
+
             const input = document.getElementById(`input-${pid}`);
-            input.value = `@${authorName} `; input.focus();
+            input.value = `@${authorName} `; 
+            input.focus();
+            
+            setTimeout(() => {
+                input.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }, 300);
         };
 
         window.handleEnter = (e, pid) => { if(e.key === 'Enter') sendCmt(pid); }
@@ -668,10 +701,16 @@
             const newCmt = { id: Date.now().toString(), author: myName, avatar: myAvatar, text: text, replyTo: window.replyStates[pid] || null, imageBase64: imgBase64 || null, reactions: {} };
 
             try {
+                const card = document.getElementById(`post-${pid}`);
+                if (card) card.dataset.showAll = 'true';
+
                 const postSnap = await window.getDoc(window.doc(window.db, "posts", pid));
                 const postData = postSnap.data();
 
-                await window.updateDoc(window.doc(window.db, "posts", pid), { comments: window.arrayUnion(newCmt) });
+                await window.updateDoc(window.doc(window.db, "posts", pid), { 
+                    comments: window.arrayUnion(newCmt),
+                    updatedAt: serverTimestamp() 
+                });
                 
                 let recipient = postData.author;
                 let notiMsg = 'đã bình luận về bài viết của bạn.';
@@ -687,11 +726,11 @@
                 window.sendNotification(recipient, notiMsg, pid);
 
                 input.value = ''; window.replyStates[pid] = null; window.removeCmtImg(pid); 
-            } catch (error) { console.error(error); alert("Lỗi gửi bình luận!"); }
+            } catch (error) { alert("Lỗi kết nối"); }
         };
 
         window.delCmt = async (pid, cmtId) => {
-            if(!confirm("Xóa bình luận này?")) return;
+            if(!confirm("Xác nhận xóa?")) return;
             const ref = window.doc(window.db, "posts", pid);
             const post = await window.getDoc(ref);
             const newCmts = post.data().comments.filter(c => c.id !== cmtId && c.replyTo !== cmtId);
@@ -705,13 +744,13 @@
             const cIndex = cmts.findIndex(c => c.id === cmtId);
             if(cIndex > -1) { 
                 const oldText = cmts[cIndex].text;
-                const newText = prompt("Sửa bình luận:", oldText);
+                const newText = prompt("Nội dung mới:", oldText);
                 if(!newText || newText === oldText) return;
                 cmts[cIndex].text = newText; await window.updateDoc(ref, { comments: cmts }); 
             }
         };
 
-        window.delPost = async (pid) => { if(confirm("Xóa hẳn bài viết này?")) await window.deleteDoc(window.doc(window.db, "posts", pid)); }
+        window.delPost = async (pid) => { if(confirm("Xác nhận xóa?")) await window.deleteDoc(window.doc(window.db, "posts", pid)); }
     </script>
 </body>
 </html>
